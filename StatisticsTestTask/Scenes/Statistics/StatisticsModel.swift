@@ -1,0 +1,7 @@
+//
+//  StatisticsModel.swift
+//  StatisticsTestTask
+//
+//  Created by shijan on 08.12.2025.
+//
+
