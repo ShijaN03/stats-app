@@ -2,14 +2,9 @@
 
 Упрощённый дашборд статистики с загрузкой данных из мокового API, кешированием и поддержкой pull-to-refresh.
 
-<p align="center">
-  <img src="Screens/users.png" width="19%" alt="Все пользователи" />
-  <img src="Screens/oftenusers.png" width="19%" alt="Частые пользователи" />
-  <img src="Screens/agegender.png" width="19%" alt="Пол и возраст" />
-  <img src="Screens/observers.png" width="19%" alt="Наблюдатели" />
-  <img src="Screens/updating.png" width="19%" alt="Обновление" />
-</p>
----
+| Все пользователи | Частые пользователи | Пол возраст | Наблюдатели | Обновление |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="Screens/users.png" width="200"> | <img src="Screens/oftenusers.png" width="200"> | <img src="Screens/agegender.png" width="200"> | <img src="Screens/observers.png" width="200"> | <img src="Screens/updating.png" width="200"> |
 
 ## Возможности
 
