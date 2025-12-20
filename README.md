@@ -4,7 +4,7 @@
 
 | Все пользователи | Частые пользователи | Пол возраст | Наблюдатели | Обновление |
 |:---:|:---:|:---:|:---:|:---:|
-| <img src="Screens/users.png" width="200"> | <img src="Screens/oftenusers.png" width="200"> | <img src="Screens/agegender.png" width="200"> | <img src="Screens/observers.png" width="200"> | <img src="Screens/updating.png" width="200"> |
+| <img src="Screens/users.png" width="120"> | <img src="Screens/oftenusers.png" width="120"> | <img src="Screens/agegender.png" width="120"> | <img src="Screens/observers.png" width="120"> | <img src="Screens/updating.png" width="120"> |
 
 ## Возможности
 
