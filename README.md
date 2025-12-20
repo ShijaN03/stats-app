@@ -4,7 +4,7 @@
 
 | Все пользователи | Частые пользователи | Пол возраст | Наблюдатели | pull-to-refresh |
 |------------------|---------------------|-------------|-------------|-----------------|
-| <img src="screens/users.png" width="150"/> | <img src="screens/oftenusers.png" width="150"/> | <img src="screens/agegender.png" width="150"/> | <img src="screens/observers.png" width="150"/> | <img src="screens/updating.png" width="150"/> |
+| <img src="Screens/users.png" width="150"/> | <img src="Screens/oftenusers.png" width="150"/> | <img src="Screens/agegender.png" width="150"/> | <img src="Screens/observers.png" width="150"/> | <img src="Screens/updating.png" width="150"/> |
 
 ---
 
