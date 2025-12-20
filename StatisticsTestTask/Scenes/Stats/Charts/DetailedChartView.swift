@@ -9,10 +9,11 @@ import UIKit
 import DGCharts
 import PinLayout
 
-class DetailedChartView: View {
+class DetailedChartView: View, ChartViewDelegate {
     
     private var chartData: [Int] = []
     private var selectedIndex: Int = 0
+    private var chartLabels: [String] = []
     
     private let btnDays: UIButton = {
         let btn = UIButton()
@@ -45,15 +46,47 @@ class DetailedChartView: View {
         return view
     }()
     
+    private let tooltipView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 12
+        view.layer.borderWidth = 1
+        view.layer.borderColor = UIColor.systemGray5.cgColor
+        view.isHidden = true
+        return view
+    }()
+    
+    private let tooltipCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .gilroy(size: 18, weight: .bold)
+        label.textColor = .mainThemeOrange
+        return label
+    }()
+    
+    private let tooltipDateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .gilroy(size: 14, weight: .regular)
+        label.textColor = .gray
+        return label
+    }()
+    
     private let chartView: LineChartView = {
         let view = LineChartView()
         view.legend.enabled = false
         view.rightAxis.enabled = false
-        view.leftAxis.enabled = false
+        view.leftAxis.enabled = true
+        view.leftAxis.drawLabelsEnabled = false
+        view.leftAxis.drawAxisLineEnabled = false
+        view.leftAxis.gridColor = .systemGray4
+        view.leftAxis.gridLineWidth = 2
+        view.leftAxis.gridLineDashLengths = [6, 4]
+        view.leftAxis.setLabelCount(3, force: true)
         view.xAxis.labelPosition = .bottom
         view.xAxis.drawGridLinesEnabled = false
         view.xAxis.labelTextColor = .gray
-        view.xAxis.labelFont = .systemFont(ofSize: 11)
+        view.xAxis.labelFont = .systemFont(ofSize: 10)
+        view.xAxis.drawAxisLineEnabled = false
+        view.xAxis.avoidFirstLastClippingEnabled = true
         view.backgroundColor = .clear
         view.doubleTapToZoomEnabled = false
         view.pinchZoomEnabled = false
@@ -66,6 +99,11 @@ class DetailedChartView: View {
         addSubview(btnMonths)
         addSubview(cardContainer)
         cardContainer.addSubview(chartView)
+        cardContainer.addSubview(tooltipView)
+        tooltipView.addSubview(tooltipCountLabel)
+        tooltipView.addSubview(tooltipDateLabel)
+        
+        chartView.delegate = self
         
         btnDays.addTarget(self, action: #selector(daysTapped), for: .touchUpInside)
         btnWeeks.addTarget(self, action: #selector(weeksTapped), for: .touchUpInside)
@@ -141,8 +179,76 @@ class DetailedChartView: View {
             .bottom()
         
         chartView.pin
-            .all()
-            .margin(16)
+            .top(60)
+            .left(16)
+            .right(16)
+            .bottom(16)
+        
+        tooltipCountLabel.pin
+            .top(8)
+            .left(12)
+            .sizeToFit()
+        
+        tooltipDateLabel.pin
+            .below(of: tooltipCountLabel)
+            .marginTop(2)
+            .left(12)
+            .sizeToFit()
+    }
+    
+    func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
+        let count = Int(entry.y)
+        let index = Int(entry.x)
+        
+        tooltipCountLabel.text = "\(count) посетител\(getVisitorEnding(count))"
+        if index < chartLabels.count {
+            tooltipDateLabel.text = formatTooltipDate(chartLabels[index])
+        }
+        
+        tooltipCountLabel.sizeToFit()
+        tooltipDateLabel.sizeToFit()
+        
+        let width = max(tooltipCountLabel.bounds.width, tooltipDateLabel.bounds.width) + 24
+        let height: CGFloat = 70
+        
+        tooltipView.frame = CGRect(x: 16, y: 8, width: width, height: height)
+        
+        tooltipCountLabel.frame = CGRect(x: 12, y: 12, width: tooltipCountLabel.bounds.width, height: tooltipCountLabel.bounds.height)
+        tooltipDateLabel.frame = CGRect(x: 12, y: tooltipCountLabel.frame.maxY + 6, width: tooltipDateLabel.bounds.width, height: tooltipDateLabel.bounds.height)
+        
+        tooltipView.isHidden = false
+    }
+    
+    func chartValueNothingSelected(_ chartView: ChartViewBase) {
+        tooltipView.isHidden = true
+    }
+    
+    private func getVisitorEnding(_ count: Int) -> String {
+        let lastTwo = count % 100
+        let lastOne = count % 10
+        
+        if lastTwo >= 11 && lastTwo <= 19 {
+            return "ей"
+        }
+        switch lastOne {
+        case 1: return "ь"
+        case 2, 3, 4: return "я"
+        default: return "ей"
+        }
+    }
+    
+    private func formatTooltipDate(_ label: String) -> String {
+        let months = ["01": "января", "02": "февраля", "03": "марта", "04": "апреля",
+                      "05": "мая", "06": "июня", "07": "июля", "08": "августа",
+                      "09": "сентября", "10": "октября", "11": "ноября", "12": "декабря"]
+        
+        let parts = label.split(separator: ".")
+        if parts.count == 2 {
+            let day = String(parts[0])
+            let month = String(parts[1])
+            return "\(Int(day) ?? 0) \(months[month] ?? label)"
+        }
+        return label
     }
     
     func updateData(with dates: [Int]) {
@@ -156,12 +262,14 @@ class DetailedChartView: View {
         let (entries, labels) = prepareChartData()
         guard !entries.isEmpty else { return }
         
+        chartLabels = labels
+        
         let dataSet = LineChartDataSet(entries: entries)
         dataSet.circleRadius = 6
         dataSet.circleColors = [.mainThemeOrange]
-        dataSet.circleHoleColor = .moduleBackground
-        dataSet.circleHoleRadius = 4
-        dataSet.lineWidth = 4
+        dataSet.circleHoleColor = .white
+        dataSet.circleHoleRadius = 3
+        dataSet.lineWidth = 3
         dataSet.setColor(.mainThemeOrange)
         dataSet.drawValuesEnabled = false
         dataSet.mode = .linear
@@ -172,8 +280,10 @@ class DetailedChartView: View {
         
         chartView.xAxis.valueFormatter = IndexAxisValueFormatter(values: labels)
         chartView.xAxis.granularity = 1
-        chartView.xAxis.labelCount = min(labels.count, 7)
+        chartView.xAxis.setLabelCount(min(labels.count, 5), force: true)
         chartView.data = LineChartData(dataSet: dataSet)
+        
+        tooltipView.isHidden = true
     }
     
     private func prepareChartData() -> ([ChartDataEntry], [String]) {
@@ -223,3 +333,4 @@ class DetailedChartView: View {
         return String(format: "%02d.%02d", day, month)
     }
 }
+

@@ -21,6 +21,11 @@ class AllVisitorsChart: View {
         view.drawBordersEnabled = false
         view.isUserInteractionEnabled = false
         view.backgroundColor = .clear
+        view.minOffset = 0
+        view.extraTopOffset = 10
+        view.extraBottomOffset = 10
+        view.extraLeftOffset = 10
+        view.extraRightOffset = 10
         return view
     }()
     
@@ -35,24 +40,35 @@ class AllVisitorsChart: View {
     func updateData(_ values: [Double]) -> Bool {
         guard !values.isEmpty else { return true }
         
+        let isGrowing = values.count < 2 || values.last! >= values.first!
+        let chartColor: UIColor = isGrowing ? .chartGreen : .chartRed
+        
         var entries: [ChartDataEntry] = []
         for (index, value) in values.enumerated() {
             entries.append(ChartDataEntry(x: Double(index), y: value))
         }
         
-        let dataSet = LineChartDataSet(entries: entries)
-        dataSet.drawCirclesEnabled = true
-        dataSet.circleRadius = 5
-        dataSet.circleColors = Array(repeating: .clear, count: max(0, values.count - 1)) + [.systemGreen]
-        dataSet.circleHoleRadius = 0
-        dataSet.lineWidth = 3
-        dataSet.setColor(.systemGreen)
-        dataSet.drawValuesEnabled = false
-        dataSet.mode = .cubicBezier
+        let lineDataSet = LineChartDataSet(entries: entries)
+        lineDataSet.drawCirclesEnabled = false
+        lineDataSet.lineWidth = 4
+        lineDataSet.setColor(chartColor)
+        lineDataSet.drawValuesEnabled = false
+        lineDataSet.mode = .cubicBezier
+        lineDataSet.cubicIntensity = 0.2
+        lineDataSet.lineDashLengths = nil
         
-        chartView.data = LineChartData(dataSet: dataSet)
+        let lastEntry = entries.last!
+        let pointDataSet = LineChartDataSet(entries: [lastEntry])
+        pointDataSet.drawCirclesEnabled = true
+        pointDataSet.circleRadius = 6
+        pointDataSet.circleColors = [chartColor]
+        pointDataSet.circleHoleRadius = 3
+        pointDataSet.circleHoleColor = .white
+        pointDataSet.lineWidth = 0
+        pointDataSet.drawValuesEnabled = false
         
-        let isGrowing = values.count < 2 || values.last! >= values.first!
+        chartView.data = LineChartData(dataSets: [lineDataSet, pointDataSet])
+        
         return isGrowing
     }
 }

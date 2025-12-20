@@ -29,4 +29,11 @@ public extension UIColor {
         UIColor(red: 249/256, green: 153/256, blue: 99/256, alpha: 1)
     }
     
+    static var chartGreen: UIColor {
+        UIColor(red: 67/256, green: 176/256, blue: 119/256, alpha: 1)
+    }
+    
+    static var chartRed: UIColor {
+        UIColor(red: 241/256, green: 74/256, blue: 96/256, alpha: 1)
+    }
 }

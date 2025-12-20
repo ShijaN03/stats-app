@@ -77,7 +77,7 @@ class StatsView: View {
             .marginTop(30)
             .left()
             .right()
-            .height(600)
+            .height(730)
         
         observers.pin
             .below(of: genderAge)

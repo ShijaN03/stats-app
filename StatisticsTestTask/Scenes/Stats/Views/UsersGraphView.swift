@@ -34,11 +34,10 @@ class UsersGraphView: View {
         return view
     }()
     
-    private let arrowLabel: UILabel = {
-        let view = UILabel()
-        view.text = "↑"
-        view.font = .systemFont(ofSize: 20, weight: .bold)
-        view.textColor = .systemGreen
+    private let arrowImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: "arrow_up")
+        view.contentMode = .scaleAspectFit
         return view
     }()
     
@@ -56,7 +55,7 @@ class UsersGraphView: View {
         addSubview(cardContainer)
         cardContainer.addSubview(allVisitorsChart)
         cardContainer.addSubview(countLabel)
-        cardContainer.addSubview(arrowLabel)
+        cardContainer.addSubview(arrowImageView)
         cardContainer.addSubview(descriptionLabel)
     }
     
@@ -76,10 +75,10 @@ class UsersGraphView: View {
             .height(98)
         
         allVisitorsChart.pin
-            .left(20)
-            .top(25)
-            .width(95)
-            .height(50)
+            .left(16)
+            .top(15)
+            .width(100)
+            .height(70)
         
         countLabel.pin
             .after(of: allVisitorsChart)
@@ -87,11 +86,11 @@ class UsersGraphView: View {
             .top(20)
             .sizeToFit()
         
-        arrowLabel.pin
+        arrowImageView.pin
             .after(of: countLabel)
             .marginLeft(4)
-            .top(to: countLabel.edge.top)
-            .sizeToFit()
+            .vCenter(to: countLabel.edge.vCenter)
+            .size(20)
         
         descriptionLabel.pin
             .after(of: allVisitorsChart)
@@ -111,12 +110,10 @@ class UsersGraphView: View {
         let isGrowing = allVisitorsChart.updateData(values)
         
         if isGrowing {
-            arrowLabel.text = "↑"
-            arrowLabel.textColor = .systemGreen
+            arrowImageView.image = UIImage(named: "arrow_up")
             descriptionLabel.text = "Количество посетителей в\nэтом месяце выросло"
         } else {
-            arrowLabel.text = "↓"
-            arrowLabel.textColor = .systemRed
+            arrowImageView.image = UIImage(named: "arrow_down")
             descriptionLabel.text = "Количество посетителей в\nэтом месяце упало"
         }
         

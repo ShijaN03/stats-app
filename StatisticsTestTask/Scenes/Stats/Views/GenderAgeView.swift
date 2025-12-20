@@ -65,11 +65,12 @@ class GenderAgeView: View {
     
     private let pieChartView: PieChartView = {
         let chart = PieChartView()
-        chart.holeRadiusPercent = 0.7
+        chart.holeRadiusPercent = 0.85
         chart.transparentCircleRadiusPercent = 0
         chart.legend.enabled = false
         chart.drawEntryLabelsEnabled = false
         chart.rotationEnabled = false
+        chart.drawSlicesUnderHoleEnabled = false
         return chart
     }()
     
@@ -109,6 +110,12 @@ class GenderAgeView: View {
     private let row6 = AgeRowView()
     private let row7 = AgeRowView()
     
+    private let separatorLine: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray5
+        return view
+    }()
+    
     override func setupContent() {
         addSubview(titleLabel)
         addSubview(btnToday)
@@ -128,6 +135,7 @@ class GenderAgeView: View {
         cardContainer.addSubview(row5)
         cardContainer.addSubview(row6)
         cardContainer.addSubview(row7)
+        cardContainer.addSubview(separatorLine)
         
         btnToday.addTarget(self, action: #selector(todayTapped), for: .touchUpInside)
         btnWeek.addTarget(self, action: #selector(weekTapped), for: .touchUpInside)
@@ -241,7 +249,7 @@ class GenderAgeView: View {
             .marginTop(16)
             .left(20)
             .right(20)
-            .bottom()
+            .bottom(20)
         
         pieChartView.pin
             .top(20)
@@ -272,16 +280,23 @@ class GenderAgeView: View {
             .vCenter(to: womenDot.edge.vCenter)
             .sizeToFit()
         
+        separatorLine.pin
+            .below(of: menDot)
+            .marginTop(24)
+            .left(16)
+            .right(16)
+            .height(1)
+        
         let rows = [row1, row2, row3, row4, row5, row6, row7]
-        var previousView: UIView = menDot
+        var previousView: UIView = separatorLine
         
         for row in rows {
             row.pin
                 .below(of: previousView)
-                .marginTop(8)
+                .marginTop(16)
                 .left(16)
                 .right(16)
-                .height(32)
+                .height(36)
             previousView = row
         }
     }
@@ -402,7 +417,7 @@ class AgeRowView: View {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        let maxBarWidth: CGFloat = 100
+        let maxBarWidth: CGFloat = 250
         
         rangeLabel.pin
             .left()

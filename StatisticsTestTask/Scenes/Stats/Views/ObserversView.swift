@@ -20,13 +20,28 @@ class ObserversView: View {
         return label
     }()
     
+    private let cardContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 16
+        return view
+    }()
+    
+    private let separatorLine: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray5
+        return view
+    }()
+    
     private let newFollowersCard = ObserverCardView(isPositive: true)
     private let unfollowersCard = ObserverCardView(isPositive: false)
     
     override func setupContent() {
         addSubview(titleLabel)
-        addSubview(newFollowersCard)
-        addSubview(unfollowersCard)
+        addSubview(cardContainer)
+        cardContainer.addSubview(newFollowersCard)
+        cardContainer.addSubview(separatorLine)
+        cardContainer.addSubview(unfollowersCard)
     }
     
     override func layoutSubviews() {
@@ -37,19 +52,30 @@ class ObserversView: View {
             .left(20)
             .sizeToFit()
         
-        newFollowersCard.pin
+        cardContainer.pin
             .below(of: titleLabel)
             .marginTop(16)
             .left(20)
             .right(20)
-            .height(100)
+            .bottom()
+        
+        newFollowersCard.pin
+            .top()
+            .left()
+            .right()
+            .height(cardContainer.bounds.height / 2 - 0.5)
+        
+        separatorLine.pin
+            .below(of: newFollowersCard)
+            .left(16)
+            .right(16)
+            .height(1)
         
         unfollowersCard.pin
-            .below(of: newFollowersCard)
-            .marginTop(12)
-            .left(20)
-            .right(20)
-            .height(100)
+            .below(of: separatorLine)
+            .left()
+            .right()
+            .bottom()
     }
     
     func configure(with statistics: [Statistic]) {
@@ -78,12 +104,11 @@ class ObserversView: View {
 class ObserverCardView: View {
     
     private let isPositive: Bool
-    private var chartColor: UIColor { isPositive ? .systemGreen : .systemRed }
+    private var chartColor: UIColor { isPositive ? .chartGreen : .chartRed }
     
     private let cardContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 16
+        view.backgroundColor = .clear
         return view
     }()
     
@@ -106,10 +131,10 @@ class ObserverCardView: View {
         return label
     }()
     
-    private let arrowLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 18, weight: .bold)
-        return label
+    private let arrowImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFit
+        return view
     }()
     
     private let descriptionLabel: UILabel = {
@@ -124,8 +149,7 @@ class ObserverCardView: View {
         self.isPositive = isPositive
         super.init()
         
-        arrowLabel.text = isPositive ? "↑" : "↓"
-        arrowLabel.textColor = chartColor
+        arrowImageView.image = UIImage(named: isPositive ? "arrow_up" : "arrow_down")
     }
     
     required init?(coder: NSCoder) {
@@ -136,7 +160,7 @@ class ObserverCardView: View {
         addSubview(cardContainer)
         cardContainer.addSubview(chartView)
         cardContainer.addSubview(countLabel)
-        cardContainer.addSubview(arrowLabel)
+        cardContainer.addSubview(arrowImageView)
         cardContainer.addSubview(descriptionLabel)
     }
     
@@ -157,11 +181,11 @@ class ObserverCardView: View {
             .top(20)
             .sizeToFit()
         
-        arrowLabel.pin
+        arrowImageView.pin
             .after(of: countLabel)
             .marginLeft(4)
-            .top(to: countLabel.edge.top)
-            .sizeToFit()
+            .vCenter(to: countLabel.edge.vCenter)
+            .size(18)
         
         descriptionLabel.pin
             .after(of: chartView)
@@ -181,25 +205,46 @@ class ObserverCardView: View {
     
     private func updateChart(with dates: [Int]) {
         let grouped = Dictionary(grouping: dates) { $0 }
-        let values = grouped.keys.sorted().map { Double(grouped[$0]?.count ?? 0) }
+        var values = grouped.keys.sorted().map { Double(grouped[$0]?.count ?? 0) }
         
         guard !values.isEmpty else { return }
+        
+        // Если только одна точка, добавляем точки для визуализации
+        if values.count == 1 {
+            let singleValue = values[0]
+            values = [singleValue * 0.5, singleValue * 0.7, singleValue]
+        } else if values.count == 2 {
+            let first = values[0]
+            let second = values[1]
+            values = [first, (first + second) / 2, second]
+        }
         
         var entries: [ChartDataEntry] = []
         for (index, value) in values.enumerated() {
             entries.append(ChartDataEntry(x: Double(index), y: value))
         }
         
-        let dataSet = LineChartDataSet(entries: entries)
-        dataSet.drawCirclesEnabled = true
-        dataSet.circleRadius = 4
-        dataSet.circleColors = Array(repeating: .clear, count: max(0, values.count - 1)) + [chartColor]
-        dataSet.circleHoleRadius = 0
-        dataSet.lineWidth = 2
-        dataSet.setColor(chartColor)
-        dataSet.drawValuesEnabled = false
-        dataSet.mode = .cubicBezier
+        // Линия без кругов
+        let lineDataSet = LineChartDataSet(entries: entries)
+        lineDataSet.drawCirclesEnabled = false
+        lineDataSet.lineWidth = 3
+        lineDataSet.setColor(chartColor)
+        lineDataSet.drawValuesEnabled = false
+        lineDataSet.mode = .cubicBezier
+        lineDataSet.cubicIntensity = 0.2
+        lineDataSet.lineDashLengths = nil
         
-        chartView.data = LineChartData(dataSet: dataSet)
+        // Точка только на конце
+        let lastEntry = entries.last!
+        let pointDataSet = LineChartDataSet(entries: [lastEntry])
+        pointDataSet.drawCirclesEnabled = true
+        pointDataSet.circleRadius = 5
+        pointDataSet.circleColors = [chartColor]
+        pointDataSet.circleHoleRadius = 2
+        pointDataSet.circleHoleColor = .white
+        pointDataSet.lineWidth = 0
+        pointDataSet.drawValuesEnabled = false
+        
+        chartView.data = LineChartData(dataSets: [lineDataSet, pointDataSet])
     }
 }

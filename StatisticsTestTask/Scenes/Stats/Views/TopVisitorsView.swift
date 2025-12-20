@@ -53,6 +53,7 @@ class TopVisitorsView: View {
             .left(20)
             .right(20)
             .bottom()
+            .marginBottom(-8)
         
         row1.pin
             .top(16)
@@ -116,7 +117,7 @@ class UserRowView: View {
     
     private let arrowView: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(systemName: "chevron.right")
+        view.image = UIImage(named: "arrow_right")
         view.tintColor = .systemGray3
         return view
     }()
@@ -155,7 +156,6 @@ class UserRowView: View {
     }
     
     func configure(with user: User) {
-        print("Configuring user: \(user.username), age: \(user.age)")
         nameLabel.text = "\(user.username), \(user.age)"
         nameLabel.textColor = .black
         onlineIndicator.backgroundColor = user.isOnline ? .systemGreen : .systemGray
